@@ -40,6 +40,12 @@ def speechToText():
     f = setFlash(text)
     if f != -1:
         return [3,f]
+    l = setLevel(text)
+    if l != -1:
+        return [4,l]
+    sl = setStartFlash(text)
+    if sl != -1:
+        return [5,sl]
     return []
     #return res.json()
 
@@ -69,3 +75,49 @@ def setFlash(res) :
         else :
             return 1
     return -1
+
+def setLevel(res) :
+    if 'set ' in res:
+        if 'sound' in res:
+            if 'high' in res:
+                return 4
+            else:
+                return 5
+    return -1
+
+def setStartFlash(res):
+    if 'set ' in res:
+        if 'start' in res and  'flash' in res :
+            newlevel = text2int(res)
+            return newlevel
+    return -1
+
+def text2int(textnum, numwords={}):
+    if not numwords:
+      units = [
+        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+        "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
+        "sixteen", "seventeen", "eighteen", "nineteen",
+      ]
+
+      tens = ["", "", "twenty", "thirty", "forty", "fifty", "sixty", "seventy", "eighty", "ninety"]
+
+      scales = ["hundred", "thousand", "million", "billion", "trillion"]
+
+      numwords["and"] = (1, 0)
+      for idx, word in enumerate(units):    numwords[word] = (1, idx)
+      for idx, word in enumerate(tens):     numwords[word] = (1, idx * 10)
+      for idx, word in enumerate(scales):   numwords[word] = (10 ** (idx * 3 or 2), 0)
+
+    current = result = 0
+    for word in textnum.split():
+        if word in numwords:
+
+            scale, increment = numwords[word]
+            current = current * scale + increment
+            if scale > 100:
+                result += current
+                current = 0
+
+    return result + current
+
