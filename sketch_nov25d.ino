@@ -5,14 +5,14 @@
 #define PIN 2
 
 float sound = 0;
-//int delayval = 0;
+int flashspeed = 0;
 int NUMPIXELS = 12;
 int startflash = 400;
 
-int r = 150;
+int r = 0;
 int g = 0;
-int b = 0;
-int mode = 0; //0 = sensors ; 1=rainbow; 2 = solidcolor
+int b = 150;
+int mode = 0; //0 = sensors ; 1=rainbow; 2 = solidcolor; 3 = color + flashing;
 int low = 100;
 int high = 400;
 
@@ -32,6 +32,7 @@ Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ80
 void setup() {
   // put your setup code here, to run once:
   Serial.begin(9600);
+  pixels.setBrightness(50);
   pixels.begin();
   pixels.show(); // Initialize all pixels to 'off'
 
@@ -55,11 +56,28 @@ void loop() {
       r = Serial.read();
       g = Serial.read();
       b = Serial.read();
-      mode = 2;
+      if (mode != 3) { mode = 2;}
+      //mode = 2;
     }
    //delay(100);
   }
-  if (Serial.available() >= 2){
+  else if (Serial.available() >= 3){
+    if (Serial.read() == 0x00){
+      mode = Serial.read();
+      int argu;
+      argu = Serial.read();
+      if (argu == 2){
+        mode = 2;
+      }
+      else if (argu == 1){
+        flashspeed = max(0,flashspeed - 50);
+      }
+      else {
+        flashspeed = min(flashspeed + 50, 100);
+      }
+    }
+  }
+  else if (Serial.available() >= 2){
     if (Serial.read() == 0x00){
       mode = Serial.read();
     }
@@ -100,7 +118,7 @@ void loop() {
 //  else {
 //    solidcolor(r, g, b, 50);
 //  }
-    solidcolor(255,255,255,50);
+    solidcolor(0,0,150,50);
   }
 else if (mode == 1 ){
   rainbow(20);
@@ -108,9 +126,24 @@ else if (mode == 1 ){
 else if (mode == 2){
   solidcolor(r,g,b,50);
 }
+else if (mode == 3){
+  flash(r,g,b,flashspeed);
+}
+  if (b == 150){
+    Serial.print(1);
+  }
   delay(100);
 }
 
+void flash(int r, int g, int b, int delayval){
+  //flash 10 times
+  for (int i =0; i<10; i++){
+    solidcolor(r,g,b,0);
+    delay(delayval);
+    solidcolor(0,0,0,0);
+    delay(delayval);
+  }
+}
 void solidcolor(int r, int g, int b, int delayval) {
   for (int i = 0; i < NUMPIXELS; i++) {
 

@@ -16,9 +16,20 @@ def setColour():
         #rainbow
         ser.write(struct.pack('>B',0))
         ser.write(struct.pack('>B',1))
+    elif len(rgb) == 2 :
+        #flash
+        ser.write(struct.pack('>B',0))
+        ser.write(struct.pack('>B',rgb[0]))
+        ser.write(struct.pack('>B',rgb[1]))
     elif rgb:
         ser.write(struct.pack('>B',0))
         ser.write(struct.pack('>B',rgb[0]))
         ser.write(struct.pack('>B',rgb[1]))
         ser.write(struct.pack('>B',rgb[2]))
     return rgb
+
+
+while True :
+    out = ser.read(1)
+    setColour()
+
