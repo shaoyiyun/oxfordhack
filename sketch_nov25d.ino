@@ -9,10 +9,12 @@ float sound = 0;
 int NUMPIXELS = 12;
 int startflash = 400;
 
-int r = 0;
+int r = 150;
 int g = 0;
 int b = 0;
 
+int low = 100;
+int high = 400;
 
 // these constants describe the pins. They won't change:
 const int groundpin = 18;             // analog input pin 4 -- ground
@@ -45,43 +47,55 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  sound = analogRead(A0);
-  Serial.print(sound);
-  // print a tab between values:
-  Serial.print("\t");
 
-  x = analogRead(xpin);
-  y = analogRead(ypin);
-  z = analogRead(zpin);
-  
-  if (sound < 100) {
-    r = 0;
-    g = 150;
-    b = 0;
-  }
+  if (Serial.available() >= 4 and Serial.read() == 0xff) {
+    r = Serial.read();
+    g = Serial.read();
+    b = Serial.read();
 
-  if (sound >= 101 & sound <= 699) {
-    r = 255;
-    g = 155;
-    b = 0;
+    Serial.println(r);
+    Serial.println(g);
+    Serial.println(b);
   }
+//  else {
+//    sound = analogRead(A0);
+//    Serial.print(sound);
+//    // print a tab between values:
+//    Serial.print("\t");
+//  
+//    x = analogRead(xpin);
+//    y = analogRead(ypin);
+//    z = analogRead(zpin);
+//    
+//    if (sound < low) {
+//      r = 0;
+//      g = 150;
+//      b = 0;
+//    }
+//  
+//    if (sound >= low & sound <= high) {
+//      r = 255;
+//      g = 155;
+//      b = 0;
+//    }
+//  
+//    if (sound > high) {
+//      r = 0;
+//      g = 0;
+//      b = 150;
+//    }
+//  }
+//   
+//  if (x > startflash or y > startflash or z > startflash) {
+//    theaterChase(pixels.Color(r, g, b), 50);
+//  }
+//  else {
+    solidcolor(r, g, b, 50);
+//  }
 
-  if (sound >= 700) {
-    r = 0;
-    g = 0;
-    b = 150;
-  }
-  
-  if (x > startflash or y > startflash or z > startflash) {
-    theaterChase(pixels.Color(r, g, b), 50);
-  }
-  else {
-    solidcolor(r, g, b, 0);
-  }
 
-
-  Serial.print(x);
-  Serial.println();
+//  Serial.print(x);
+//  Serial.println();
 //  theaterChase(pixels.Color(0, 0, 127), 50); // Blue
 //  green();
 

@@ -21,12 +21,12 @@ def speechToText():
     }
 
     res = requests.post(url=url, data=data, headers=headers)
-    return getTheColor(res['DisplayText'])
+    return getTheColor(res.json()['DisplayText'])
     #return res.json()
 
 def getTheColor(res):
     for key in colours:
         if key in res:
             return colours[key]
-    return [256,0,0]
+    return []
 
