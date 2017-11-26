@@ -21,7 +21,13 @@ def speechToText():
     }
 
     res = requests.post(url=url, data=data, headers=headers)
-    return getTheColor(res.json()['DisplayText'])
+    print(res.json())
+    text = res.json()['DisplayText'].lower()
+    if reset(text):
+        return [-1]
+    if setRainbow(text):
+        return [1] #mode for rainbow
+    return getTheColor(text)
     #return res.json()
 
 def getTheColor(res):
@@ -30,3 +36,12 @@ def getTheColor(res):
             return colours[key]
     return []
 
+def setRainbow(res):
+    if 'rainbow' in res:
+            return True
+    return False
+
+def reset(res):
+    if 'reset' in res:
+        return True
+    return False

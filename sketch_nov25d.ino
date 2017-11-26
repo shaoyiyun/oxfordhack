@@ -12,7 +12,7 @@ int startflash = 400;
 int r = 150;
 int g = 0;
 int b = 0;
-
+int mode = 0; //0 = sensors ; 1=rainbow; 2 = solidcolor
 int low = 100;
 int high = 400;
 
@@ -23,9 +23,9 @@ const int xpin = A2;                  // x-axis of the accelerometer
 const int ypin = A3;                  // y-axis
 const int zpin = A4;                  // z-axis (only on 3-axis models)
 
-int x = 0;
-int y = 0;
-int z = 0;
+char x = 0;
+char y = 0;
+char z = 0;
 
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
@@ -43,22 +43,30 @@ void setup() {
   pinMode(powerpin, OUTPUT);
   digitalWrite(groundpin, LOW);
   digitalWrite(powerpin, HIGH);
+
+  Serial.println();
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
 
-  if (Serial.available() >= 4 and Serial.read() == 0xff) {
-    r = Serial.read();
-    g = Serial.read();
-    b = Serial.read();
-
-    Serial.println(r);
-    Serial.println(g);
-    Serial.println(b);
+  if (Serial.available() >= 4) {
+    if (Serial.read() == 0x00) {
+      r = Serial.read();
+      g = Serial.read();
+      b = Serial.read();
+      mode = 2;
+    }
+   //delay(100);
   }
-//  else {
-//    sound = analogRead(A0);
+  if (Serial.available() >= 2){
+    if (Serial.read() == 0x00){
+      mode = Serial.read();
+    }
+  }
+
+  if (mode == 0){
+    //    sound = analogRead(A0);
 //    Serial.print(sound);
 //    // print a tab between values:
 //    Serial.print("\t");
@@ -90,15 +98,16 @@ void loop() {
 //    theaterChase(pixels.Color(r, g, b), 50);
 //  }
 //  else {
-    solidcolor(r, g, b, 50);
+//    solidcolor(r, g, b, 50);
 //  }
-
-
-//  Serial.print(x);
-//  Serial.println();
-//  theaterChase(pixels.Color(0, 0, 127), 50); // Blue
-//  green();
-
+    solidcolor(255,255,255,50);
+  }
+else if (mode == 1 ){
+  rainbow(20);
+}
+else if (mode == 2){
+  solidcolor(r,g,b,50);
+}
   delay(100);
 }
 
@@ -175,30 +184,30 @@ void theaterChase(uint32_t c, uint8_t wait) {
   }
 }
 
-//void rainbow(uint8_t wait) {
-//  Serial.println("rainbow");
-//  uint16_t i, j;
-//
-//  for(j=0; j<256; j++) {
-//    for(i=0; i < strip.numPixels(); i++) { //fade through all colors
-//      strip.setPixelColor(i, Wheel((i+j) & 255));
-//    }
-//    strip.show(); // This sends the updated pixel color to the hardware.
-//    delay(wait);
-//  }
-//}
+void rainbow(uint8_t wait) {
+  Serial.println("rainbow");
+  uint16_t i, j;
+
+  for(j=0; j<256; j++) {
+    for(i=0; i < pixels.numPixels(); i++) { //fade through all colors
+      pixels.setPixelColor(i, Wheel((i+j) & 255));
+    }
+    pixels.show(); // This sends the updated pixel color to the hardware.
+    delay(wait);
+  }
+}
 
 // Input a value 0 to 255 to get a color value.
 // The colours are a transition r - g - b - back to r.
-//uint32_t Wheel(byte WheelPos) {
-//  WheelPos = 255 - WheelPos;
-//  if(WheelPos < 85) {
-//    return strip.Color(255 - WheelPos * 3, 0, WheelPos * 3);
-//  }
-//  if(WheelPos < 170) {
-//    WheelPos -= 85;
-//    return strip.Color(0, WheelPos * 3, 255 - WheelPos * 3);
-//  }
-//  WheelPos -= 170;
-//  return strip.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
-//}
+uint32_t Wheel(byte WheelPos) {
+  WheelPos = 255 - WheelPos;
+  if(WheelPos < 85) {
+    return pixels.Color(255 - WheelPos * 3, 0, WheelPos * 3);
+  }
+  if(WheelPos < 170) {
+    WheelPos -= 85;
+    return pixels.Color(0, WheelPos * 3, 255 - WheelPos * 3);
+  }
+  WheelPos -= 170;
+  return pixels.Color(WheelPos * 3, 255 - WheelPos * 3, 0);
+}
